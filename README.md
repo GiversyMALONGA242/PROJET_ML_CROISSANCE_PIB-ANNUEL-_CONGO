@@ -25,7 +25,7 @@ prevision-pib-congo-ml/
 └── README.md                                    # Documentation complète du projet
 ```
 
-> **Note de conservation (v1 figée) :** le notebook `notebook_and_script/ML_PIB_COG.ipynb` et le modèle `modele_ar_pib_congo_v1.joblib` sont conservés en l'état pour la **v1** ; on évite de les recompiler ou de les écraser inutilement lors de simples consultations ou exports d'images.
+
 
 ## 2. Chargement, extraction, nettoyage et stationnarité
 
