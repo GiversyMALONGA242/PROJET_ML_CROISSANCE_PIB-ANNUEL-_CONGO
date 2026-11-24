@@ -47,7 +47,14 @@ prevision-pib-congo-ml/
 
 * **Traitement des valeurs manquantes :** prise en charge des valeurs manquantes (notamment l'imputation par la moyenne de l'observation manquante en `1960` lors du prétraitement initial).
 * **Appréciation visuelle de la stationnarité :** dès le tracé initial de la série de croissance du PIB congolais, la courbe paraît déjà stationnaire : elle oscille autour d'un niveau moyen sans tendance divergente sur l'ensemble de la période, malgré des chocs ponctuels marqués.
+### 5.1. Visualisation initiale — Stationnarité visuelle de la croissance du PIB (Congo)
 
+![Stationnarité visuelle de la croissance du PIB du Congo](assets/stationnarite_visuelle_pib_cog.png)
+
+* **Observation :** la croissance annuelle du PIB de la République du Congo paraît déjà stationnaire visuellement : elle oscille autour d'un niveau moyen avec des phases d'expansion et de contraction, sans dérive continue.
+
+* **Interprétation :** cette appréciation visuelle, fera donc l'objet d'un test de stationnarité empirique notamment le test **ADF(Augmented Dickey-Fuller)** 
+  
 * **Test statistique ADF  :** pour confirmer formellement cette intuition visuelle, seul le test **ADF (Augmented Dickey-Fuller)** a été réalisé. Le test ADF rejette la racine unitaire (`p-value = 0.000`), confirmant la stationnarité de la série et permettant de modéliser directement `Croissance_PIB` sans différenciation supplémentaire.
 
 ## 3. Ce qui a été fait après le test ADF : lags, validation et modélisation
@@ -86,16 +93,6 @@ Passer à **`MAX_LAG = 2`** et **`alpha = 5.0`** abaisse le **`MAE` moyen de `5.
 * La **prévision récursive jusqu'en 2030** réinjecte chaque prévision annuelle comme prochain retard (`lag_1`, `lag_2`), produisant une trajectoire tendancielle douce et convergente (démarrant autour de **3.19 %** et se stabilisant progressivement vers **~3.38 %** en **2030**).
 
 ## 5. Visualisations et interprétation
-
-> Assurez-vous que les trois fichiers PNG ci-dessous portent exactement ces noms dans le dossier `assets/` afin qu'ils s'affichent correctement sur GitHub.
-
-### 5.1. Visualisation initiale — Stationnarité visuelle de la croissance du PIB (Congo)
-
-![Stationnarité visuelle de la croissance du PIB du Congo](assets/stationnarite_visuelle_pib_cog.png)
-
-* **Observation :** la croissance annuelle du PIB de la République du Congo paraît déjà stationnaire visuellement : elle oscille autour d'un niveau moyen avec des phases d'expansion et de contraction, sans dérive continue.
-
-* **Interprétation :** cette appréciation visuelle, confirmée par le test **ADF** (`p-value = 0.000`), valide la stationnarité de la série et permet de travailler directement sur `Croissance_PIB`.
 
 ### 5.2. Série observée vs Série estimée — Configuration initiale
 
