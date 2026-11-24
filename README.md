@@ -95,7 +95,7 @@ Passer à **`MAX_LAG = 2`** et **`alpha = 5.0`** abaisse le **`MAE` moyen de `5.
 
 * **Observation :** la croissance annuelle du PIB de la République du Congo paraît déjà stationnaire visuellement : elle oscille autour d'un niveau moyen avec des phases d'expansion et de contraction, sans dérive continue.
 
-* **Interprétation :** cette appréciation visuelle, confirmée par le test **ADF** (`p-value = 0.000`, sans recours au test KPSS), valide la stationnarité de la série et permet de travailler directement sur `Croissance_PIB`.
+* **Interprétation :** cette appréciation visuelle, confirmée par le test **ADF** (`p-value = 0.000`), valide la stationnarité de la série et permet de travailler directement sur `Croissance_PIB`.
 
 ### 5.2. Série observée vs Série estimée — Configuration initiale
 
