@@ -22,8 +22,6 @@ prevision-pib-congo-ml/
 │   ├── stationnarite_visuelle_pib_cog.png       # Visualisation initiale avant modélisation (stationnarité visuelle)
 │   ├── serie_observee_vs_estimee_v0.png         # Série observée vs série estimée (configuration initiale)
 │   └── serie_observee_vs_estimee_ar2_ridge.png  # Série observée vs série estimée (modèle AR(2) Ridge ajusté)
-├── requirements.txt                             # Liste des packages Python nécessaires
-├── .gitignore                                   # Fichiers temporaires/caches ignorés par Git
 └── README.md                                    # Documentation complète du projet
 ```
 
