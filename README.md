@@ -45,11 +45,10 @@ prevision-pib-congo-ml/
 
 ### Nettoyage et vérification de la stationnarité (visuelle + test ADF, sans KPSS)
 
-* **Traitement des valeurs manquantes :** prise en charge des valeurs manquantes (notamment l'imputation par la moyenne de l'observation manquante en `1960` lors du prétraitement initial). *(Point d'attention méthodologique : réaliser une imputation globale avant le découpage temporel introduit une légère fuite d'information rétrospective à surveiller.)*
-
+* **Traitement des valeurs manquantes :** prise en charge des valeurs manquantes (notamment l'imputation par la moyenne de l'observation manquante en `1960` lors du prétraitement initial).
 * **Appréciation visuelle de la stationnarité :** dès le tracé initial de la série de croissance du PIB congolais, la courbe paraît déjà stationnaire : elle oscille autour d'un niveau moyen sans tendance divergente sur l'ensemble de la période, malgré des chocs ponctuels marqués.
 
-* **Test statistique ADF (et non KPSS) :** pour confirmer formellement cette intuition visuelle, seul le test **ADF (Augmented Dickey-Fuller)** a été réalisé (le test **KPSS** n'a pas été appliqué). Le test ADF rejette la racine unitaire (`p-value = 0.000`), confirmant la stationnarité de la série et permettant de modéliser directement `Croissance_PIB` sans différenciation supplémentaire.
+* **Test statistique ADF  :** pour confirmer formellement cette intuition visuelle, seul le test **ADF (Augmented Dickey-Fuller)** a été réalisé. Le test ADF rejette la racine unitaire (`p-value = 0.000`), confirmant la stationnarité de la série et permettant de modéliser directement `Croissance_PIB` sans différenciation supplémentaire.
 
 ## 3. Ce qui a été fait après le test ADF : lags, validation et modélisation
 
