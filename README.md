@@ -50,7 +50,7 @@ prevision-pib-congo-ml/
 
 Une fois la stationnarité validée par le test ADF, le travail s'est déroulé selon les étapes suivantes :
 
-1. **Création des variables retardées (*lags*) :** transformation de la série stationnaire en problème supervisé en générant des retards (`lag_1`, `lag_2`, ..., `lag_k`) sur `Croissance_PIB`, suivis d'un `.dropna()` sur les premières lignes incomplètes.
+1. **Création des variables retardées (*lags*) :** transformation de la série stationnaire en problème supervisé en générant des retards (`lag_1`, `lag_2`, `lag_3`) sur `Croissance_PIB`, suivis d'un `.dropna()` sur les premières lignes incomplètes.
 2. **Validation temporelle sans fuite (`TimeSeriesSplit`) :** évaluation chronologique des modèles face à une *baseline* naïve (`lag_1`) et à d'autres algorithmes (`ElasticNet`, `RandomForest`). Sur la configuration initiale de référence, la régression `Ridge` s'est démarquée avec un `MAE` moyen d'environ **5.115**.
 
 ### Série observée vs Série estimée — Configuration initiale
