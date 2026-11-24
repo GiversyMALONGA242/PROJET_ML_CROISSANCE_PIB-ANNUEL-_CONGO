@@ -44,7 +44,7 @@ prevision-pib-congo-ml/
 ![Stationnarité visuelle de la croissance du PIB du Congo](assets/stationnarite_visuelle_pib_cog.png)
 
 * **Observation :** la croissance annuelle du PIB de la République du Congo paraît déjà stationnaire visuellement : elle oscille autour d'un niveau moyen avec des phases d'expansion et de contraction, sans dérive continue.
-* **Test statistique ADF :** pour confirmer formellement cette appréciation visuelle, seul le test **ADF (Augmented Dickey-Fuller)** (sans test KPSS) a été réalisé. Le test ADF rejette la racine unitaire (`p-value = 0.000`), confirmant la stationnarité de la série et permettant de modéliser directement `Croissance_PIB` sans différenciation supplémentaire.
+* **Test statistique ADF :** pour confirmer formellement cette appréciation visuelle, seul le test **ADF (Augmented Dickey-Fuller)** a été réalisé. Le test ADF rejette la racine unitaire (`p-value = 0.000`), confirmant la stationnarité de la série et permettant de modéliser directement `Croissance_PIB` sans différenciation supplémentaire.
 
 ## 3. Premier modèle initial avec trois retards (`MAX_LAG = 3`)
 
