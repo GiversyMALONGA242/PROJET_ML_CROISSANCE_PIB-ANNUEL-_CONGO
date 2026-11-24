@@ -1,6 +1,6 @@
-# Prévision de la croissance du PIB réel — République du Congo (`NY.GDP.MKTP.KD.ZG`)
+# 🤖📊📈Prévision de la croissance du PIB réel — République du Congo
 
-Ce dépôt présente une démarche complète de **Machine Learning appliqué aux séries temporelles** pour analyser, valider et projeter la **croissance annuelle du PIB réel de la République du Congo** (`NY.GDP.MKTP.KD.ZG`) jusqu'en **2030**.
+Ce dépôt présente une démarche complète de **Machine Learning appliqué aux séries temporelles** pour analyser, valider et projeter la **croissance annuelle du PIB réel de la République du Congo** jusqu'en **2030**.
 
 Le projet est organisé en deux étapes :
 
