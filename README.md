@@ -47,7 +47,7 @@ prevision-pib-congo-ml/
 
 * **Traitement des valeurs manquantes :** prise en charge des valeurs manquantes (notamment l'imputation par la moyenne de l'observation manquante en `1960` lors du prétraitement initial).
 * **Appréciation visuelle de la stationnarité :** dès le tracé initial de la série de croissance du PIB congolais, la courbe paraît déjà stationnaire : elle oscille autour d'un niveau moyen sans tendance divergente sur l'ensemble de la période, malgré des chocs ponctuels marqués.
-### 5.1. Visualisation initiale — Stationnarité visuelle de la croissance du PIB (Congo)
+### Visualisation initiale — Stationnarité visuelle de la croissance du PIB (Congo)
 
 ![Stationnarité visuelle de la croissance du PIB du Congo](assets/stationnarite_visuelle_pib_cog.png)
 
