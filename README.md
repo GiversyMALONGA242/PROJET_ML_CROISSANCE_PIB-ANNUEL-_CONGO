@@ -65,11 +65,19 @@ Une fois la stationnarité validée par le test ADF, le travail s'est déroulé 
 
 2. **Validation temporelle sans fuite (`TimeSeriesSplit`) :** évaluation chronologique des modèles face à une *baseline* naïve (`lag_1`) et à d'autres algorithmes (`ElasticNet`, `RandomForest`). Sur la configuration initiale de référence, la régression `Ridge` s'est démarquée avec un `MAE` moyen d'environ **5.115**.
 
-3. **Ajustement des hyperparamètres (`MAX_LAG` et `alpha`) :** recherche ciblée sur la profondeur de retard (`MAX_LAG`) et la régularisation `Ridge` (`alpha`), retenant **`MAX_LAG = 2`** et **`alpha = 5.0`** (`MAE_moyen = 4.740`, `RMSE_moyen = 5.778`).
+### Série observée vs Série estimée — Configuration initiale
 
-4. **Entraînement final, projection récursive jusqu'en 2030 et sauvegarde :** entraînement du `Pipeline` (`StandardScaler` + `Ridge(alpha=5.0)`) sur l'historique complet, génération de la prévision récursive jusqu'en **2030** (trajectoire douce et convergente d'environ **3.19 %** à **~3.38 %**), et exportation dans **`modele_ar_pib_congo_v1.joblib`**.
+![Série observée vs Série estimée — configuration initiale](assets/serie_observee_vs_estimee_v0.png)
 
-5. **Inspection graphique et préparation de la v2 :** comparaison visuelle *série observée vs série estimée* pour vérifier le comportement du modèle ajusté et poser les bases du **deuxième modèle (`v2`)** avec variables macroéconomiques exogènes.
+* **Observation :** la série estimée suit le mouvement moyen de la série observée mais reste nettement plus lissée lors des variations rapides.
+
+* **Interprétation :** La courbe estimée suit la tendance moyenne de la croissance du PIB mais reste fortement aplatie face aux variations brusques. La pénalisation Ridge privilégie la stabilité en réduisant la variance, ce qui lisse les pics élevés (au-delà de 15 %–20 %) et les chutes sévères (sous -5 %), justifiant la recherche d'un meilleur équilibre entre le nombre de retards (MAX_LAG) et la régularisation (alpha).
+
+4. **Ajustement des hyperparamètres (`MAX_LAG` et `alpha`) :** recherche ciblée sur la profondeur de retard (`MAX_LAG`) et la régularisation `Ridge` (`alpha`), retenant **`MAX_LAG = 2`** et **`alpha = 5.0`** (`MAE_moyen = 4.740`, `RMSE_moyen = 5.778`).
+
+5. **Entraînement final, projection récursive jusqu'en 2030 et sauvegarde :** entraînement du `Pipeline` (`StandardScaler` + `Ridge(alpha=5.0)`) sur l'historique complet, génération de la prévision récursive jusqu'en **2030** (trajectoire douce et convergente d'environ **3.19 %** à **~3.38 %**), et exportation dans **`modele_ar_pib_congo_v1.joblib`**.
+
+6. **Inspection graphique et préparation de la v2 :** comparaison visuelle *série observée vs série estimée* pour vérifier le comportement du modèle ajusté et poser les bases du **deuxième modèle (`v2`)** avec variables macroéconomiques exogènes.
 
 ## 4. Premier modèle (`v1`) : Modèle Autorégressif `AR(2)` avec `Ridge`
 
@@ -94,13 +102,6 @@ Passer à **`MAX_LAG = 2`** et **`alpha = 5.0`** abaisse le **`MAE` moyen de `5.
 
 ## 5. Visualisations et interprétation
 
-### 5.2. Série observée vs Série estimée — Configuration initiale
-
-![Série observée vs Série estimée — configuration initiale](assets/serie_observee_vs_estimee_v0.png)
-
-* **Observation :** la série estimée suit le mouvement moyen de la série observée mais reste nettement plus lissée lors des variations rapides.
-
-* **Interprétation :** la régularisation `Ridge` réduit la variance au prix d'un amortissement des pics élevés (au-delà de `15 %–20 %`) et des chutes marquées (sous `-5 %`).
 
 ### 5.3. Série observée vs Série estimée — Modèle `AR(2)` `Ridge` ajusté (`lag=2`, `alpha=5`)
 
