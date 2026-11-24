@@ -34,7 +34,7 @@ prevision-pib-congo-ml/
 2. **Extraction du sous-ensemble Congo (`data_cog`) :** filtrage sur la République du Congo pour isoler la chronologie d'intérêt, puis enregistrement de l'extrait dédié (`data_cog.csv` dans `dataset/`) afin de disposer d'une base claire pour la modélisation.
 3. **Tri chronologique (`Year`) :** ordonnancement strict des observations par année croissante (`Year`) afin de garantir l'ordre temporel avant la génération des variables retardées (*lags*).
 
-### Nettoyage et vérification de la stationnarité (visuelle + test ADF, sans KPSS)
+### Nettoyage et vérification de la stationnarité (visuelle + test ADF)
 
 * **Traitement des valeurs manquantes :** prise en charge des valeurs manquantes (notamment l'imputation par la moyenne de l'observation manquante en `1960` lors du prétraitement initial).
 * **Appréciation visuelle de la stationnarité :** dès le tracé initial de la série de croissance du PIB congolais, la courbe paraît déjà stationnaire : elle oscille autour d'un niveau moyen sans tendance divergente sur l'ensemble de la période, malgré des chocs ponctuels marqués.
