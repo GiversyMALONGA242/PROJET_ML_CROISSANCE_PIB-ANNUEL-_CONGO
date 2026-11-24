@@ -37,7 +37,7 @@ prevision-pib-congo-ml/
 
 ### Étapes de chargement et d'extraction
 
-1. **Chargement du dataset principal :** importation du fichier CSV principal dans un `DataFrame` `pandas` (`dataset/`) et vérification de la structure des colonnes et des pays présents.
+1. **Chargement du dataset principal :** importation du fichier CSV principal dans un `DataFrame` `pandas` (`dataset/API_NY.GDP.MKTP.KD.ZG_DS2_fr_csv_v2_122.csv`) et vérification de la structure des colonnes et des pays présents.
 
 2. **Extraction du sous-ensemble Congo (`data_cog`) :** filtrage sur la République du Congo pour isoler la chronologie d'intérêt, puis enregistrement de l'extrait dédié (`data_cog.csv` dans `dataset/`) afin de disposer d'une base claire pour la modélisation.
 
