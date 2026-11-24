@@ -92,6 +92,15 @@ Passer de **`MAX_LAG = 3`** à **`MAX_LAG = 2`** avec **`alpha = 5.0`** réduit 
 
 * Le pipeline final (`StandardScaler` + `Ridge(alpha=5.0)`) est entraîné sur l'ensemble de l'historique disponible et enregistré dans **`modele_ar_pib_congo_v1.joblib`**.
 * La **prévision récursive jusqu'en 2030** réinjecte chaque prévision annuelle comme prochain retard (`lag_1`, `lag_2`), produisant une trajectoire tendancielle douce et convergente (démarrant autour de **3.19 %** et se stabilisant progressivement vers **~3.38 %** en **2030**).
+#### Projections annuelles de la croissance du PIB réel (2026–2030)
+
+| `Year` | `Croissance_PIB_Predite` (%) | Nature de la projection |
+| :---: | :---: | :--- |
+| **2026** | **3.190** | Prévision récursive (`t+1`) |
+| **2027** | **3.295** | Prévision récursive (`t+2`) |
+| **2028** | **3.344** | Prévision récursive (`t+3`) |
+| **2029** | **3.370** | Prévision récursive (`t+4`) |
+| **2030** | **3.383** | Prévision récursive (`t+5`) |
 
 ## 5. Visualisation finale — Modèle `AR(2)` `Ridge` ajusté (`lag=2`, `alpha=5`)
 
