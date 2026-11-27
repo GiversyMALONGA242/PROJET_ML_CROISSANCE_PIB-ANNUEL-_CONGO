@@ -93,19 +93,25 @@ Passer de **`MAX_LAG = 3`** à **`MAX_LAG = 2`** avec **`alpha = 5.0`** réduit 
 - Le pipeline final (`StandardScaler` + `Ridge(alpha=5.0)`) est entraîné sur l'ensemble de l'historique disponible et enregistré dans **`modele_ar_pib_congo_v1.joblib`**.
 - La **prévision récursive jusqu'en 2030** réinjecte chaque prévision annuelle comme prochain retard (`lag_1`, `lag_2`), produisant une trajectoire tendancielle douce et convergente (démarrant autour de **3.19 %** et se stabilisant progressivement vers **~3.38 %** en **2030**).
 
-#### Projections annuelles de la croissance du PIB réel (2026–2030)
-
-| `Year` | `Croissance_PIB_Predite` (%) | Nature de la projection |
-| :---: | :---: | :--- |
-| **2026** | **3.190** | Prévision récursive (`t+1`) |
-| **2027** | **3.295** | Prévision récursive (`t+2`) |
-| **2028** | **3.344** | Prévision récursive (`t+3`) |
-| **2029** | **3.370** | Prévision récursive (`t+4`) |
-| **2030** | **3.383** | Prévision récursive (`t+5`) |
-
 ## 5. Visualisation finale — Modèle `AR(2)` `Ridge` ajusté (`lag=2`, `alpha=5`)
 
 ![Série observée vs Série estimée — Modèle AR(2) Ridge ajusté](assets/serie_observee_vs_estimee_ar2_ridge.png)
 
 - **Observation :** l'axe `Year` est gradué proprement de `1962` à la fin de l'historique, et la courbe orange (`Ridge, lag=2, alpha=5`) épouse plus souplement les évolutions récentes tout en restant plus douce que les chocs extrêmes.
 - **Interprétation globale :** parce qu'il s'appuie uniquement sur le passé de la variable cible (`lag_1`, `lag_2`), le modèle `AR(2)` constitue un **repère tendanciel (`baseline`)** cohérent et lisible jusqu'en **2030** (`~3.19 %` à `~3.38 %`), reflétant la convergence progressive vers la dynamique moyenne de la série.
+
+## 6. Conclusion et projections (2026–2030)
+
+Le modèle autorégressif **`AR(2)` avec régularisation `Ridge(alpha=5.0)`** (`modele_ar_pib_congo_v1.joblib`) s'impose comme la configuration la plus performante et la plus équilibrée de l'étude (`MAE = 4.740`, `RMSE = 5.778` en validation croisée `TimeSeriesSplit`). Il offre une meilleure capacité de généralisation que le modèle initial à 3 retards (`MAE = 5.115`) tout en conservant un cadre sobre, reproductible et exempt de fuite de données.
+
+### Tableau des prévisions de croissance du PIB réel (2026–2030)
+
+| Année (`Year`) | `lag_1` utilisé (%) | `lag_2` utilisé (%) | Prévision `Croissance_PIB` (%) | Type de projection |
+| :---: | :---: | :---: | :---: | :--- |
+| **2026** | 3.083 | 2.100 | **3.190** | Prévision récursive (`t+1`) |
+| **2027** | 3.190 | 3.083 | **3.295** | Prévision récursive (`t+2`) |
+| **2028** | 3.295 | 3.190 | **3.344** | Prévision récursive (`t+3`) |
+| **2029** | 3.344 | 3.295 | **3.370** | Prévision récursive (`t+4`) |
+| **2030** | 3.370 | 3.344 | **3.383** | Prévision récursive (`t+5`) |
+
+En conclusion, la projection récursive de **2026 à 2030** trace une évolution graduelle et régulière de **3.19 %** en 2026 jusqu'à **3.38 %** en 2030, prolongeant la dynamique observée en 2025 (**3.08 %**) et convergeant naturellement vers le rythme tendanciel de la série historique.
