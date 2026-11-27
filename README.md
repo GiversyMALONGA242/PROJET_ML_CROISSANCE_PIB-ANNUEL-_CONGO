@@ -1,17 +1,15 @@
 # 🤖📊📈 Prévision de la croissance du PIB réel — République du Congo
 
-Ce dépôt présente une démarche complète de **Machine Learning appliqué aux séries temporelles** pour analyser, valider et projeter la **croissance annuelle du PIB réel de la République du Congo (`COG`)** jusqu'en **2030**.
+Ce dépôt présente une démarche complète de **Machine Learning appliqué aux séries temporelles** pour analyser, valider et projeter la **croissance annuelle du PIB réel de la République du Congo** jusqu'en **2030**.
 
-Le projet combine une approche univariée autorégressive (`AR(2)`) et une phase d'évaluation multivariée (`ARX` avec indicateurs macroéconomiques retardés), validées de manière chronologique via `TimeSeriesSplit`. Les expériences montrent qu'un modèle parcimonieux `AR(2)` régularisé (`StandardScaler` + `Ridge(alpha=5.0)`) offre la meilleure généralisation hors échantillon (`MAE = 4.740`, `RMSE = 5.778`), surclassant les modèles à 3 retards, les approches non linéaires (`RandomForest`) ainsi que les extensions multivariées testées.
-
----
+Le projet repose sur un modèle autorégressif (`AR(2)`) avec régression `Ridge` (`StandardScaler` + `Ridge`), une validation chronologique via `TimeSeriesSplit`, l'ajustement des hyperparamètres (`MAX_LAG = 2`, `alpha = 5.0`), la prévision récursive jusqu'en **2030** et la sauvegarde du modèle (`modele_ar_pib_congo_v1.joblib`).
 
 ## 1. Structure du dépôt
 
 ```text
-PROJET_ML_CROISSANCE_PIB-ANNUEL-_CONGO/
+prevision-pib-congo-ml/
 ├── notebook_and_script/                          # Notebook et scripts du projet
-│   └── ML_PIB_COG.ipynb                          # Notebook principal (extraction, nettoyage, ADF, AR(2), ARX, prévision 2030)
+│   └── ML_PIB_COG.ipynb                          # Notebook principal (extraction, nettoyage, ADF, lags, ML, prévision 2030)
 ├── modele_ar_pib_congo_v1.joblib                 # Modèle figé et sauvegardé (Ridge, lag=2, alpha=5.0)
 ├── dataset/                                      # Données principales et extraites
 │   ├── API_NY.GDP.MKTP.KD.ZG_DS2_fr_csv_v2_122.csv # Jeu de données initial complet (Banque mondiale)
@@ -19,123 +17,95 @@ PROJET_ML_CROISSANCE_PIB-ANNUEL-_CONGO/
 ├── assets/                                       # Graphiques PNG intégrés au README
 │   ├── stationnarite_visuelle_pib_cog.png        # Visualisation initiale avant modélisation (stationnarité visuelle)
 │   ├── serie_observee_vs_estimee_v0.png          # Série observée vs série estimée (premier modèle avec 3 lags)
-│   ├── serie_observee_vs_estimee_ar2_ridge.png   # Série observée vs série estimée (modèle AR(2) Ridge ajusté)
-│   └── comparaison_ar2_vs_modele2_2030.png       # Superposition AR(2) vs Modèle 2 multivarié & projection 2026–2030
+│   └── serie_observee_vs_estimee_ar2_ridge.png   # Série observée vs série estimée (modèle AR(2) Ridge ajusté)
 └── README.md                                     # Documentation complète du projet
 ```
-
----
 
 ## 2. Chargement, extraction, nettoyage et stationnarité
 
 ### Source et variable cible
 
-- **Source :** World Development Indicators (Banque mondiale) — croissance annuelle du PIB réel (`NY.GDP.MKTP.KD.ZG`) et indicateurs macroéconomiques complémentaires (`Exports`, `Imports`, `FBCF`, `Conso_Publique_Pct_PIB`, `Compte_Courant_Pct_PIB`, `Inflation_IPC`).
-- **Pays ciblé :** République du Congo (`COG`), sur 66 observations annuelles (`1960`–`2025`).
+- **Source :** indicateur macroéconomique de croissance annuelle du PIB réel (`NY.GDP.MKTP.KD.ZG`, World Development Indicators / Banque mondiale).
+- **Pays ciblé :** République du Congo (`COG`).
 
-### Étapes de préparation
+### Étapes de chargement et d'extraction
 
 1. **Chargement du dataset principal :** importation du fichier CSV principal dans un `DataFrame` `pandas` (`dataset/API_NY.GDP.MKTP.KD.ZG_DS2_fr_csv_v2_122.csv`) et vérification de la structure des colonnes et des pays présents.
-2. **Extraction du sous-ensemble Congo (`data_cog`) :** filtrage sur la République du Congo pour isoler la chronologie d'intérêt et sauvegarde dans `dataset/data_cog.csv`.
-3. **Tri chronologique (`Year`) et prévention des fuites de données :** ordonnancement strict par année croissante (`Year`) avant la création des retards (*lags*) et encapsulation systématique de l'imputation (`SimpleImputer`) et de la standardisation (`StandardScaler`) à l'intérieur des `Pipeline` `scikit-learn`.
+2. **Extraction du sous-ensemble Congo (`data_cog`) :** filtrage sur la République du Congo pour isoler la chronologie d'intérêt, puis enregistrement de l'extrait dédié (`data_cog.csv` dans `dataset/`) afin de disposer d'une base claire pour la modélisation.
+3. **Tri chronologique (`Year`) :** ordonnancement strict des observations par année croissante (`Year`) afin de garantir l'ordre temporel avant la création des variables retardées (*lags*).
 
-### Vérification de la stationnarité (visuelle + test ADF)
+### Nettoyage et vérification de la stationnarité (visuelle + test ADF)
+
+- **Traitement des valeurs manquantes :** prise en charge des valeurs manquantes (notamment l'imputation par la moyenne de l'observation manquante en `1960` lors du prétraitement initial).
+- **Appréciation visuelle de la stationnarité :** dès le tracé initial de la série de croissance du PIB congolais, la courbe paraît déjà stationnaire : elle oscille autour d'un niveau moyen sans tendance divergente sur l'ensemble de la période, malgré des chocs ponctuels marqués.
+
+### Visualisation initiale — Stationnarité visuelle de la croissance du PIB (Congo)
 
 ![Stationnarité visuelle de la croissance du PIB du Congo](assets/stationnarite_visuelle_pib_cog.png)
 
-- **Observation :** la croissance annuelle du PIB de la République du Congo oscille autour d'une moyenne historique d'environ `3.5 %` avec des phases d'expansion et de contraction marquées, sans dérive tendancielle continue.
-- **Test statistique ADF :** le test **ADF (Augmented Dickey-Fuller)** rejette l'hypothèse de racine unitaire (`p-value = 0.000`), confirmant la stationnarité de la série et permettant de modéliser directement `Croissance_PIB` sans différenciation supplémentaire.
+- **Observation :** la croissance annuelle du PIB de la République du Congo paraît déjà stationnaire visuellement : elle oscille autour d'un niveau moyen avec des phases d'expansion et de contraction, sans dérive continue.
+- **Test statistique ADF :** le test **ADF (Augmented Dickey-Fuller)** rejette la racine unitaire (`p-value = 0.000`), confirmant la stationnarité de la série et permettant de modéliser directement `Croissance_PIB` sans différenciation supplémentaire.
 
----
+## 3. Premier modèle initial avec trois retards (`MAX_LAG = 3`)
 
-## 3. Modèle exploratoire initial à trois retards (`MAX_LAG = 3`)
+Une fois la stationnarité confirmée par le test ADF, une première phase de modélisation exploratoire a été menée en construisant un modèle autorégressif à **trois retards (`MAX_LAG = 3`)** :
 
-Une première phase de modélisation a évalué un modèle autorégressif à **trois retards (`lag_1`, `lag_2`, `lag_3`)** sur **63 observations (`1963`–`2025`)** via `TimeSeriesSplit` (`n_splits=5`) :
+1. **Création des trois variables retardées (`lag_1`, `lag_2`, `lag_3`) :** transformation de la série stationnaire en problème d'apprentissage supervisé en utilisant les trois années précédentes (`lag_1`, `lag_2` et `lag_3`) pour prédire `Croissance_PIB` à l'année $t$. Après suppression des trois premières lignes incomplètes (`1960`–`1962`), le jeu de données prêt pour le Machine Learning compte **63 observations (années `1963` à `2025`)**.
+2. **Validation croisée temporelle (`TimeSeriesSplit`, `n_splits=5`) et comparaison des modèles :** évaluation stricte dans l'ordre chronologique (sans fuite de données) de trois algorithmes candidats (`Ridge`, `ElasticNet` et `RandomForest`) :
 
-- **Ridge :** `MAE = 5.115` | `RMSE = 6.234`
-- **ElasticNet :** `MAE = 5.204` | `RMSE = 6.228`
-- **RandomForest :** `MAE = 5.617` | `RMSE = 6.634`
+- **Ridge :**
+  - **Erreur absolue moyenne (MAE) :** `5.115`
+  - **Racine de l'erreur quadratique moyenne (RMSE) :** `6.234`
+- **ElasticNet :**
+  - **Erreur absolue moyenne (MAE) :** `5.204`
+  - **Racine de l'erreur quadratique moyenne (RMSE) :** `6.228`
+- **RandomForest :**
+  - **Erreur absolue moyenne (MAE) :** `5.617`
+  - **Racine de l'erreur quadratique moyenne (RMSE) :** `6.634`
+
+3. **Sélection de l'algorithme `Ridge` :** sur cette configuration initiale à **3 lags**, la régression **`Ridge`** obtient la plus faible **Erreur absolue moyenne (MAE)** (`5.115`) tout en restant très proche d'`ElasticNet` sur la **Racine de l'erreur quadratique moyenne (RMSE)** (`6.234` contre `6.228`), ce qui motive son choix pour la suite de l'optimisation.
+4. **Diagnostic visuel du premier modèle (`MAX_LAG = 3`) :** tracé de la série observée face à la série estimée afin d'analyser le comportement concret des prédictions.
+
+### Série observée vs Série estimée — Premier modèle initial (`3 lags`)
 
 ![Série observée vs Série estimée — Premier modèle initial (3 lags)](assets/serie_observee_vs_estimee_v0.png)
 
-- **Enseignement :** `Ridge` surpasse `ElasticNet` et `RandomForest` sur le `MAE`, mais l'inclusion du troisième retard (`lag_3`) introduit de l'inertie supplémentaire sans gain de précision hors échantillon.
+- **Observation :** la série estimée suit le mouvement moyen de la série observée mais reste nettement plus lissée lors des variations rapides.
+- **Interprétation :** la courbe estimée suit la tendance moyenne de la croissance du PIB mais reste fortement aplatie face aux variations brusques. La pénalisation `Ridge` privilégie la stabilité en réduisant la variance, ce qui lisse les pics élevés (au-delà de 15 %–20 %) et les chutes sévères (sous -5 %). De plus, l'inclusion du troisième retard (`lag_3`) ajoute de l'inertie sans améliorer la précision, ce qui justifie l'étape suivante d'optimisation conjointe du nombre de retards (`MAX_LAG`) et du paramètre de régularisation (`alpha`).
 
----
-
-## 4. Optimisation univariée et sélection du modèle `AR(2)` `Ridge`
+## 4. Ajustement et modèle retenu : Modèle Autorégressif `AR(2)` avec `Ridge`
 
 ### Grille d'ajustement (`MAX_LAG` et `alpha`)
 
-Une grille d'hyperparamètres sur `MAX_LAG` (`1` à `4`) et `alpha` (`1.0` à `50.0`) évaluée via `TimeSeriesSplit` (`n=64`) a permis d'identifier la configuration optimale :
+À partir des enseignements du premier modèle à 3 lags, une grille d'ajustement sur `MAX_LAG` (`1` à `4`) et `alpha` (`1.0` à `50.0`) évaluée via `TimeSeriesSplit` a permis d'affiner les performances :
 
 | Rang | `MAX_LAG` | `alpha` | Erreur absolue moyenne (MAE) | Racine de l'erreur quadratique moyenne (RMSE) | Observation |
 | :---: | :---: | :---: | :---: | :---: | :--- |
-| 1 | **2** | **5.0** | **4.740** | **5.778** | **Configuration optimale retenue (`lag_optimal = 2`, `alpha = 5.0`)** |
+| 1 | **2** | **5.0** | **4.740** | **5.778** | **Configuration retenue (`lag_optimal = 2`, `alpha_optimal = 5.0`)** |
 | 2 | 2 | 10.0 | 4.742 | 5.820 | Très proche, régularisation légèrement plus marquée |
-| 3 | 1 | 1.0 | 4.760 | 5.772 | Modèle `AR(1)` sobre, `RMSE` légèrement inférieur |
+| 3 | 1 | 1.0 | 4.760 | 5.772 | Modèle `AR(1)` sobre, `RMSE` très légèrement inférieur |
 | 4 | 2 | 1.0 | 4.775 | 5.753 | Moins de lissage sur les erreurs quadratiques |
 
-Passer de `MAX_LAG = 3` à **`MAX_LAG = 2`** avec **`alpha = 5.0`** réduit le `MAE` de `5.115` à **`4.740`** et le `RMSE` de `6.234` à **`5.778`**.
+Passer de **`MAX_LAG = 3`** à **`MAX_LAG = 2`** avec **`alpha = 5.0`** réduit l'**Erreur absolue moyenne (MAE)** de `5.115` à **`4.740`** et la **Racine de l'erreur quadratique moyenne (RMSE)** de `6.234` à **`5.778`**. Les deux premiers retards annuels (`lag_1`, `lag_2`) concentrent l'information utile à court terme, tandis que la suppression de `lag_3` élimine du bruit inutile.
 
-### Comparaison d'algorithmes sur la base `AR(2)` (`n=64`)
+### Entraînement final, prévision jusqu'en 2030 et sauvegarde
 
-| Modèle | `n_obs` | `MAE_moyen` | `RMSE_moyen` |
-| :--- | :---: | :---: | :---: |
-| **Ridge (`alpha=5.0`) [Modèle retenu]** | **64** | **4.740** | **5.778** |
-| Ridge (`alpha=15.0`) | 64 | 4.752 | 5.862 |
-| Ridge (`alpha=1.0`) | 64 | 4.775 | 5.753 |
-| Lasso (`alpha=0.5`) | 64 | 4.783 | 5.816 |
-| ElasticNet (`alpha=0.5, l1=0.5`) | 64 | 4.784 | 5.816 |
-| RandomForest (`depth=3, n=200`) | 64 | 5.305 | 6.378 |
+- Le pipeline final (`StandardScaler` + `Ridge(alpha=5.0)`) est entraîné sur l'ensemble de l'historique disponible et enregistré dans **`modele_ar_pib_congo_v1.joblib`**.
+- La **prévision récursive jusqu'en 2030** réinjecte chaque prévision annuelle comme prochain retard (`lag_1`, `lag_2`), produisant une trajectoire tendancielle douce et convergente (démarrant autour de **3.19 %** et se stabilisant progressivement vers **~3.38 %** en **2030**).
 
----
+#### Projections annuelles de la croissance du PIB réel (2026–2030)
 
-## 5. Évaluation multivariée (`Modèle 2` / `ARX`) et contrôle de robustesse
+| `Year` | `Croissance_PIB_Predite` (%) | Nature de la projection |
+| :---: | :---: | :--- |
+| **2026** | **3.190** | Prévision récursive (`t+1`) |
+| **2027** | **3.295** | Prévision récursive (`t+2`) |
+| **2028** | **3.344** | Prévision récursive (`t+3`) |
+| **2029** | **3.370** | Prévision récursive (`t+4`) |
+| **2030** | **3.383** | Prévision récursive (`t+5`) |
 
-Afin de vérifier si l'intégration de déterminants macroéconomiques améliore la prévision, plusieurs variables exogènes retardées d'un an (`lag1`, pour éviter toute fuite de données) ont été testées : `Conso_Publique_Pct_PIB_lag1`, `Exports_lag1`, `Imports_lag1` et `FBCF_lag1`.
-
-### A. Modèle multivarié complet (`AR(2)` + 4 exogènes `lag1`)
-
-- **Modèle 2 — ElasticNet :** `MAE_moyen = 5.832` | `RMSE_moyen = 7.222`
-- **Modèle 2 — RandomForest :** `MAE_moyen = 5.889` | `RMSE_moyen = 6.962`
-- **Modèle 2 — Ridge (`alpha=5.0`) :** `MAE_moyen = 6.149` | `RMSE_moyen = 7.578`
-
-L'ajout simultané des variables exogènes en niveau retardé dégrade fortement la généralisation (`MAE` passant de `4.740` à `5.832–6.149`) en raison de la forte variance et de la taille limitée de l'échantillon annuel.
-
-### B. Étude d'ablation et contrôle à périmètre strictement égal (`n=51`)
-
-| Modèle testé | Périmètre (`n_obs`) | `MAE_moyen` | `RMSE_moyen` | Conclusion |
-| :--- | :---: | :---: | :---: | :--- |
-| **Baseline `AR(2)` — même échantillon** | **51** | **4.222** | **5.137** | **Meilleure généralisation à période identique** |
-| `AR(2)` + `FBCF_lag1` | 51 | 4.562 | 5.642 | Dégrade le score par rapport au baseline sur `n=51` |
-| `AR(2)` + `Exports_lag1` | 64 | 4.895 | 5.988 | Ajoute du bruit par rapport au baseline (`4.740`) |
-| `AR(2)` + `Imports_lag1` | 64 | 4.977 | 6.228 | Dégrade le `MAE` et le `RMSE` |
-| `AR(2)` + `Conso_Publique_Pct_PIB_lag1` | 64 | 5.546 | 6.821 | Forte dégradation hors échantillon |
-
-> **Pourquoi le modèle `AR(2)` `Ridge(alpha=5.0)` est définitivement retenu :** ce choix repose sur une sélection empirique rigoureuse. À échantillon identique (`n=51` comme `n=64`), le modèle `AR(2)` bat systématiquement les extensions multivariées en validation temporelle tout en exploitant l'intégralité de l'historique disponible depuis 1962.
-
----
-
-## 6. Prévision récursive (2026–2030) et visualisations finales
-
-Le pipeline final (`StandardScaler` + `Ridge(alpha=5.0)`) est entraîné sur l'historique complet disponible et sauvegardé dans **`modele_ar_pib_congo_v1.joblib`**. À partir de la croissance observée en 2025 (**`3.083 %`**), la prévision récursive réinjecte chaque estimation annuelle comme prochain retard (`lag_1`, `lag_2`) :
-
-| `Year` | `lag_1` utilisé (%) | `lag_2` utilisé (%) | `Croissance_PIB_Predite` (%) | Nature de la projection |
-| :---: | :---: | :---: | :---: | :--- |
-| **2026** | 3.083 | 2.100 | **3.190** | Prévision récursive (`t+1`) |
-| **2027** | 3.190 | 3.083 | **3.295** | Prévision récursive (`t+2`) |
-| **2028** | 3.295 | 3.190 | **3.344** | Prévision récursive (`t+3`) |
-| **2029** | 3.344 | 3.295 | **3.370** | Prévision récursive (`t+4`) |
-| **2030** | 3.370 | 3.344 | **3.383** | Prévision récursive (`t+5`) |
+## 5. Visualisation finale — Modèle `AR(2)` `Ridge` ajusté (`lag=2`, `alpha=5`)
 
 ![Série observée vs Série estimée — Modèle AR(2) Ridge ajusté](assets/serie_observee_vs_estimee_ar2_ridge.png)
 
-*(Optionnel : enregistrer la superposition comparative `AR(2)` vs `Modèle 2` et prévision `2026–2030` dans `assets/comparaison_ar2_vs_modele2_2030.png`.)*
-
----
-
-## 7. Interprétation, limites et pistes d'évolution
-
-- **Interprétation de la trajectoire 2026–2030 :** la projection récursive dessine une stabilisation progressive entre **`3.19 %` (2026)** et **`3.38 %` (2030)**, convergeant naturellement vers le régime moyen historique de l'économie congolaise (`~3.5 %`).
-- **Limites assumées :** en tant que modèle autorégressif régularisé entraîné sur données annuelles (`MAE` moyen de `4.74` points en validation croisée), `AR(2)` fournit un **scénario central inertiel** fiable, mais ne peut anticiper seul des chocs exogènes majeurs (fluctuations brutales du cours du pétrole, chocs budgétaires ou crises externes).
-- **Pistes futures :** intégrer des indicateurs sectoriels à plus haute fréquence (prix du baril Brent, production pétrolière en volume) ou tester des transformations stationnaires différenciées (`diff(1)`) couplées à des scénarios macroéconomiques (prudent, central, optimiste).
+- **Observation :** l'axe `Year` est gradué proprement de `1962` à la fin de l'historique, et la courbe orange (`Ridge, lag=2, alpha=5`) épouse plus souplement les évolutions récentes tout en restant plus douce que les chocs extrêmes.
+- **Interprétation globale :** parce qu'il s'appuie uniquement sur le passé de la variable cible (`lag_1`, `lag_2`), le modèle `AR(2)` constitue un **repère tendanciel (`baseline`)** cohérent et lisible jusqu'en **2030** (`~3.19 %` à `~3.38 %`), reflétant la convergence progressive vers la dynamique moyenne de la série.
